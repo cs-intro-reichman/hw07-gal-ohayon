@@ -1,52 +1,56 @@
 public class LocalTester {
-    public static final int N_K_OUTPUT_LENGTH = 3;
-    public static TestHandler testHandler = new TestHandler();
+    public static final int BUFFER_SIZE = 3; 
+    public static TestHandler runner = new TestHandler();
+
     public static void main(String[] args) {
-        StdOut.println("Welcome to the Localized Tester!");
-        TesterQuestionEnum questionSelected = null;
-        String input = "";
-        In in = new In();
-        TesterQuestionEnum[] questions = TesterQuestionEnum.values();
+        StdOut.println("Starting the Debugging Tool..."); 
+        TesterQuestionEnum selectedOption = null;
+        String userInput = "";
+        In inputReader = new In();
+        TesterQuestionEnum[] allTasks = TesterQuestionEnum.values();
        
-        while (questionSelected == null) {
-            StdOut.println("Please enter the question or question number you would like to test:\n");
-            for (int i = 0; i < questions.length; i++) {
-                StdOut.println((i + 1) + ". " + questions[i] + " (" + questions[i].getQuestion() + ")");
+        boolean shouldRunAll = false;
+        
+        while (selectedOption == null) {
+            StdOut.println("Select a task number or name to begin testing:\n");
+            for (int i = 0; i < allTasks.length; i++) {
+                StdOut.printf("%d] %s - (%s)\n", (i + 1), allTasks[i], allTasks[i].getQuestion());
             }
-            StdOut.println((questions.length + 1) + ". Run All Questions");
+            StdOut.println((allTasks.length + 1) + ". Execute All Tests");
             
-            StdOut.println("");
-            input = in.readLine().toLowerCase().replaceAll(" ", "");
-            if (input.equals("all") || input.equals("") || input.equals((questions.length + 1) + "")) {
+            StdOut.println("\nYour choice: ");
+            userInput = inputReader.readLine().trim().toLowerCase().replace(" ", "");
+
+            if (userInput.equals("all") || userInput.isEmpty() || userInput.equals(String.valueOf(allTasks.length + 1))) {
+                shouldRunAll = true;
                 break;
             }
-            questionSelected = isValidQuestion(input);
+            selectedOption = findMatchingQuestion(userInput);
         }
-        if (input.equals("all") || input.equals((questions.length + 1) + "")) {
-            for (TesterQuestionEnum question : questions) {
-                testHandler.questionDecider(question, question.getArgsPassed().split(" "));
+
+        if (shouldRunAll) {
+            for (TesterQuestionEnum task : allTasks) {
+                runner.questionDecider(task, task.getArgsPassed().split(" "));
             }
         } else {
-            testHandler.questionDecider(questionSelected, questionSelected.getArgsPassed().split(" "));
+            runner.questionDecider(selectedOption, selectedOption.getArgsPassed().split(" "));
         }
-        testHandler.conclusion();
+        runner.conclusion();
     }
 
-
-    public static TesterQuestionEnum isValidQuestion(String input) {
-        TesterQuestionEnum[] questions = TesterQuestionEnum.values();
-        TesterQuestionEnum questionSelected = null;
-        for (int i = 0; i < questions.length; i++) {
+    public static TesterQuestionEnum findMatchingQuestion(String rawInput) {
+        TesterQuestionEnum[] options = TesterQuestionEnum.values();
+        for (int i = 0; i < options.length; i++) {
             try {
-                questionSelected = TesterQuestionEnum.valueOf(input);
-                break;
-            } catch (Exception e) {
-                if (questions[i].getQuestion().toLowerCase().equals(input.toLowerCase()) || input.equals((i + 1) + "")) {
-                    questionSelected = questions[i];
-                    break;
+                if (options[i].name().equalsIgnoreCase(rawInput)) {
+                    return options[i];
                 }
+            } catch (Exception e) {  }
+
+            if (options[i].getQuestion().equalsIgnoreCase(rawInput) || rawInput.equals(String.valueOf(i + 1))) {
+                return options[i];
             }
         }
-        return questionSelected;
+        return null;
     }
 }
