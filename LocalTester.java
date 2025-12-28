@@ -1,34 +1,32 @@
 public class LocalTester {
-    public static final int BUFFER_SIZE = 3; 
+    public static final int N_K_OUTPUT_LENGTH = 3; 
+    
     public static TestHandler runner = new TestHandler();
 
     public static void main(String[] args) {
-        StdOut.println("Starting the Debugging Tool..."); 
+        StdOut.println("Starting the Auto-Tester..."); 
         TesterQuestionEnum selectedOption = null;
         String userInput = "";
         In inputReader = new In();
         TesterQuestionEnum[] allTasks = TesterQuestionEnum.values();
        
-        boolean shouldRunAll = false;
-        
         while (selectedOption == null) {
-            StdOut.println("Select a task number or name to begin testing:\n");
+            StdOut.println("Please select the question or index you want to verify:\n");
             for (int i = 0; i < allTasks.length; i++) {
-                StdOut.printf("%d] %s - (%s)\n", (i + 1), allTasks[i], allTasks[i].getQuestion());
+                StdOut.println((i + 1) + ". " + allTasks[i] + " (" + allTasks[i].getQuestion() + ")");
             }
-            StdOut.println((allTasks.length + 1) + ". Execute All Tests");
+            StdOut.println((allTasks.length + 1) + ". Run Everything");
             
-            StdOut.println("\nYour choice: ");
+            StdOut.println("");
             userInput = inputReader.readLine().trim().toLowerCase().replace(" ", "");
 
             if (userInput.equals("all") || userInput.isEmpty() || userInput.equals(String.valueOf(allTasks.length + 1))) {
-                shouldRunAll = true;
                 break;
             }
-            selectedOption = findMatchingQuestion(userInput);
+            selectedOption = findMatchingTask(userInput);
         }
 
-        if (shouldRunAll) {
+        if (userInput.equals("all") || userInput.equals(String.valueOf(allTasks.length + 1))) {
             for (TesterQuestionEnum task : allTasks) {
                 runner.questionDecider(task, task.getArgsPassed().split(" "));
             }
@@ -38,16 +36,18 @@ public class LocalTester {
         runner.conclusion();
     }
 
-    public static TesterQuestionEnum findMatchingQuestion(String rawInput) {
+    // שינוי שם הפונקציה מ-isValidQuestion ל-findMatchingTask
+    public static TesterQuestionEnum findMatchingTask(String rawInput) {
         TesterQuestionEnum[] options = TesterQuestionEnum.values();
         for (int i = 0; i < options.length; i++) {
             try {
                 if (options[i].name().equalsIgnoreCase(rawInput)) {
                     return options[i];
                 }
-            } catch (Exception e) {  }
-
-            if (options[i].getQuestion().equalsIgnoreCase(rawInput) || rawInput.equals(String.valueOf(i + 1))) {
+            } catch (Exception e) {
+            }
+            
+            if (options[i].getQuestion().toLowerCase().equals(rawInput.toLowerCase()) || rawInput.equals(String.valueOf(i + 1))) {
                 return options[i];
             }
         }
